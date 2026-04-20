@@ -1,0 +1,185 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    padding: 0 20px 20px 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Glassmorphism Sticky Header */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background: rgba(13, 17, 23, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 30px 0 10px 0;
+    margin-bottom: 20px;
+    z-index: 100;
+    border-bottom: 1px solid #30363d;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+}
+
+h1 span {
+    color: #00ff7f; /* Neon Green */
+}
+
+header p {
+    color: #8b949e;
+    margin-top: 5px;
+}
+
+/* Search Bar */
+.controls {
+    display: flex;
+    justify-content: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    background-color: #010409;
+    color: #ffffff;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #00ff7f;
+    box-shadow: 0 0 8px rgba(0, 255, 127, 0.2);
+}
+
+/* Category Buttons */
+.category-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 15px 5px;
+    margin-top: 10px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #30363d transparent;
+}
+
+.category-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.category-container::-webkit-scrollbar-thumb {
+    background-color: #30363d;
+    border-radius: 10px;
+}
+
+.category-btn {
+    background-color: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+    border-color: #58a6ff;
+    background-color: #1f242b;
+}
+
+.category-btn.active {
+    background-color: rgba(0, 255, 127, 0.1);
+    color: #00ff7f;
+    border-color: #00ff7f;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
+}
+
+.status-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #8b949e;
+    margin-top: 10px;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #161b22;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+th, td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+}
+
+th {
+    background-color: #21262d;
+    color: #ffffff;
+}
+
+tr {
+    transition: background-color 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+tr:hover {
+    background-color: #1f242b;
+    border-left: 3px solid #00ff7f;
+}
+
+a.tool-link {
+    color: #58a6ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+a.tool-link:hover {
+    color: #79c0ff;
+}
+
+/* Tag Styles */
+.tag-advanced { background-color: rgba(163, 113, 247, 0.2); color: #a371f7; border: 1px solid #a371f7; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.tag-beginner { background-color: rgba(46, 160, 67, 0.2); color: #2ea043; border: 1px solid #2ea043; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT-Explorer | Live Directory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sticky Header Group -->
+        <div class="sticky-header">
+            <header>
+                <h1>OSINT<span>Explorer</span></h1>
+                <p>Auto-updating open-source intelligence directory.</p>
+            </header>
+
+            <div class="controls">
+                <input type="text" id="searchInput" placeholder="Search tools, keywords, or features... (e.g., 'email', 'domain')">
+            </div>
+            
+            <!-- Category Buttons Container -->
+            <div id="categoryButtons" class="category-container">
+                <!-- JavaScript will inject the buttons here -->
+            </div>
+
+            <div id="toolCount" class="status-text">Fetching live data from GitHub...</div>
+        </div>
+
+        <table id="toolsTable">
+            <thead>
+                <tr>
+                    <th>Tool Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Difficulty</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- JavaScript will inject the tools here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
