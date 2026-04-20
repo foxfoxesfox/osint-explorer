@@ -5,7 +5,7 @@ let activeCategory = "All";
 
 // Default sorting state
 let sortCol = "name";
-let sortAsc = true; // true = A-Z, false = Z-A
+let sortAsc = true; 
 
 async function fetchTools() {
     try {
@@ -57,7 +57,6 @@ function parseMarkdown(markdown) {
     });
 
     populateCategoryButtons();
-    // Run filterTools initially to apply the default A-Z sorting
     filterTools(); 
 }
 
@@ -110,23 +109,30 @@ function filterTools() {
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     
     let filteredTools = osintTools.filter(tool => {
-        const matchesSearch = tool.name.toLowerCase().includes(searchTerm) || tool.description.toLowerCase().includes(searchTerm) || tool.category.toLowerCase().includes(searchTerm);
+        // Safe lowercasing for search
+        const safeName = (tool.name || "").toLowerCase();
+        const safeDesc = (tool.description || "").toLowerCase();
+        const safeCat = (tool.category || "").toLowerCase();
+        
+        const matchesSearch = safeName.includes(searchTerm) || safeDesc.includes(searchTerm) || safeCat.includes(searchTerm);
         const matchesCategory = activeCategory === "All" || tool.category === activeCategory;
+        
         return matchesSearch && matchesCategory;
     });
 
-    // Handle Sorting
+    // Handle Sorting Safely
     filteredTools.sort((a, b) => {
-        let valA = a[sortCol];
-        let valB = b[sortCol];
+        // Safe value extraction to prevent undefined errors
+        let valA = a[sortCol] || "";
+        let valB = b[sortCol] || "";
 
         if (sortCol === "difficulty") {
-            // Force Beginner (1) to come before Advanced (2)
             valA = a.difficulty === "Beginner" ? 1 : 2;
             valB = b.difficulty === "Beginner" ? 1 : 2;
         } else {
-            valA = valA.toLowerCase();
-            valB = valB.toLowerCase();
+            // Only lowercase if it's a string
+            valA = valA.toString().toLowerCase();
+            valB = valB.toString().toLowerCase();
         }
 
         if (valA < valB) return sortAsc ? -1 : 1;
@@ -138,7 +144,6 @@ function filterTools() {
     renderTable(filteredTools);
 }
 
-// Update the Up/Down arrows in the table headers
 function updateSortHeaders() {
     document.querySelectorAll('th.sortable .sort-icon').forEach(icon => icon.innerText = '');
     const activeTh = document.querySelector(`th[data-sort="${sortCol}"] .sort-icon`);
@@ -147,15 +152,14 @@ function updateSortHeaders() {
     }
 }
 
-// Add click listeners to headers for sorting
 document.querySelectorAll('th.sortable').forEach(th => {
     th.addEventListener('click', () => {
         const col = th.getAttribute('data-sort');
         if (sortCol === col) {
-            sortAsc = !sortAsc; // Toggle direction if clicking the same column
+            sortAsc = !sortAsc; 
         } else {
             sortCol = col;
-            sortAsc = true; // Default to ascending when clicking a new column
+            sortAsc = true; 
         }
         filterTools();
     });
