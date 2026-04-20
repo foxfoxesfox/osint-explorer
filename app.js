@@ -1,25 +1,20 @@
-// Using GitHub Contents API — proper CORS headers, works from any hosted domain
 const API_URL = "https://api.github.com/repos/jivoi/awesome-osint/contents/README.md";
 
-let osintTools = [];
-let categories = new Set();
-let activeCategory = "All";
+let osintTools      = [];
+let categories      = new Set();
+let activeCategory  = "All";
 
 async function fetchTools() {
     try {
         const res = await fetch(API_URL, {
             headers: { "Accept": "application/vnd.github.v3+json" }
         });
-
         if (!res.ok) throw new Error(`GitHub API error: status ${res.status}`);
 
         const json = await res.json();
-
         if (!json.content) throw new Error("No content returned from GitHub API.");
 
-        // GitHub Contents API returns Base64-encoded content
         const markdown = atob(json.content.replace(/\n/g, ""));
-
         document.getElementById("toolCount").innerText = "Parsing data...";
         parseMarkdown(markdown);
 
@@ -30,36 +25,38 @@ async function fetchTools() {
     }
 }
 
+function cleanHeading(raw) {
+    return raw
+        .replace(/^#+\s*/, "")
+        .replace(/\[.*?\]\(.*?\)\s*/g, "")
+        .replace(/[^\x00-\x7F]/g, "")
+        .replace(/[*_`~]/g, "")
+        .trim();
+}
+
 function parseMarkdown(markdown) {
     const lines = markdown.split("\n");
-    // Matches: * [Tool Name](https://...) - Description
-    const toolRegex = /^[*-]\s+\[(.+?)\]\((https?:\/\/.+?)\)(?:\s*[-–—:]\s*(.*))?$/;
+
+    // FIX: also match *[Name](url) with NO space after the asterisk
+    const toolRegex = /^[*-]\s*\[(.+?)\]\((https?:\/\/.+?)\)(?:\s*[-–—:]\s*(.*))?$/;
+
     let currentCategory = "General";
-    let parsingTools = false;
+    let parsingTools    = false;
+
+    const skipHeadings = new Set([
+        "table of contents", "contributing", "credits", "license", ""
+    ]);
 
     lines.forEach(line => {
         const trimmed = line.trim();
 
-        // Detect headings: ## [↑](#...) Category Name  OR  ## Category Name
         if (trimmed.startsWith("## ") || trimmed.startsWith("### ")) {
-            // Strip markdown hashes, strip the [↑](...) back-link, clean up
-            let heading = trimmed
-                .replace(/^#+\s*/, "")                    // remove leading # symbols
-                .replace(/\[.*?\]\(.*?\)\s*/g, "")        // remove [↑](...) links
-                .replace(/📖|🔍|🕵️|⚠️|🔎/g, "")        // remove emoji
-                .trim();
+            const heading = cleanHeading(trimmed);
+            if (skipHeadings.has(heading.toLowerCase())) return;
 
-            // Skip the Table of Contents heading itself
-            if (heading.toLowerCase().includes("table of contents")) return;
-            if (heading.toLowerCase().includes("contributing")) return;
-            if (heading.toLowerCase().includes("credits")) return;
-
-            // Once we hit a valid real heading, start parsing tools
-            if (heading.length > 0 && heading.length < 60) {
-                parsingTools = true;
-                currentCategory = heading;
-                categories.add(currentCategory);
-            }
+            parsingTools    = true;
+            currentCategory = heading;
+            categories.add(currentCategory);
             return;
         }
 
@@ -102,12 +99,23 @@ function populateCategoryButtons() {
         const btn = document.createElement("button");
         btn.className = "category-btn" + (category === "All" ? " active" : "");
         btn.innerText = category;
+
         btn.onclick = () => {
-            document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            activeCategory = category;
+            // FIX: clicking an already-active category deselects it back to "All"
+            if (activeCategory === category && category !== "All") {
+                activeCategory = "All";
+                document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+                document.querySelector(".category-btn[data-cat='All']").classList.add("active");
+            } else {
+                activeCategory = category;
+                document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+            }
             filterTools();
         };
+
+        // Store category name as data attribute for easy lookup
+        btn.setAttribute("data-cat", category);
         container.appendChild(btn);
     });
 }
@@ -152,6 +160,4 @@ function filterTools() {
 }
 
 document.getElementById("searchInput").addEventListener("input", filterTools);
-
-// Start
 fetchTools();

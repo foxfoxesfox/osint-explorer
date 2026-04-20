@@ -73,18 +73,16 @@ input[type="text"]:focus {
     box-shadow: 0 0 8px rgba(0, 255, 127, 0.2);
 }
 
-/* Category Buttons */
+/* Category Buttons — wrapping grid, not horizontal scroll */
 .category-container {
     display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 15px 5px;
+    flex-wrap: wrap;        /* wraps to new lines instead of scrolling */
+    gap: 8px;
+    padding: 12px 5px;
     margin-top: 10px;
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #30363d transparent;
 }
 
 .category-container::-webkit-scrollbar {
