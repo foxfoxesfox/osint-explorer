@@ -1,69 +1,55 @@
-// Add a random timestamp to bypass aggressive browser caching
-const CACHE_BUSTER = new Date().getTime();
-const GITHUB_RAW_URL = `https://raw.githubusercontent.com/jivoi/awesome-osint/master/README.md?v=${CACHE_BUSTER}`;
-
+const GITHUB_RAW_URL = "https://raw.githubusercontent.com/jivoi/awesome-osint/master/README.md";
 let osintTools = [];
 let categories = new Set();
 let activeCategory = "All"; 
 
-let sortCol = "name";
-let sortAsc = true; 
-
 async function fetchTools() {
     try {
-        // Update the loading text so we know it's trying to connect
-        document.getElementById("toolCount").innerText = "Connecting to GitHub...";
-        
-        const response = await fetch(GITHUB_RAW_URL, {
-            method: 'GET',
-            // Do not send extra headers, this prevents CORS pre-flight blocks
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP Error! Status: ${response.status}`);
-        }
-        
+        const response = await fetch(GITHUB_RAW_URL);
         const markdownText = await response.text();
-        
-        document.getElementById("toolCount").innerText = "Parsing data...";
         parseMarkdown(markdownText);
-        
     } catch (error) {
-        // Print the exact error to the screen so we can see what's wrong
-        document.getElementById("toolCount").innerHTML = `<span style="color: #ff4444;">Connection failed: ${error.message}. Please try refreshing the page.</span>`;
-        console.error("Fetch error details:", error);
+        document.getElementById("toolCount").innerText = "Error loading tools. Check internet connection.";
+        console.error("Error fetching data:", error);
     }
 }
 
 function parseMarkdown(markdown) {
     const lines = markdown.split('\n');
     let currentCategory = "General";
+    
+    // We only want tools that start with a bullet point and have a standard URL format
     const toolRegex = /^[*-]\s+\[(.*?)\]\((http.*?)\)(?:\s*(?:[-:]|—)\s*(.*))?$/;
+    
+    // Flag to tell us when we are past the Table of Contents
     let parsingTools = false;
 
-    // Reset array to prevent duplicates on reload
-    osintTools = [];
-
     lines.forEach(line => {
+        // Stop skipping lines once we hit the first real category after the TOC
         if (line.startsWith('## ↑ ') || line.startsWith('### General Search')) {
             parsingTools = true;
         }
+
+        // If we are still in the Table of Contents, skip this line
         if (!parsingTools) return;
 
+        // Find category headers (usually ## ↑ or ###)
         if (line.startsWith('### ') || line.startsWith('## ↑ ')) {
+            // Clean up the category name by removing markdown hashes and arrows
             currentCategory = line.replace(/#/g, '').replace('↑', '').trim();
-            if (currentCategory.length > 0 && currentCategory.length < 40) {
+            if (currentCategory.length < 40) {
                 categories.add(currentCategory);
             }
         } 
         else {
+            // Only match lines that have http/https in the URL part
             const match = line.match(toolRegex);
             if (match) {
-                // Force everything to be a string immediately to prevent undefined errors
-                const name = String(match[1] || "").trim();
-                const url = String(match[2] || "").trim();
-                const description = String(match[3] || "No description provided.").trim();
+                const name = match[1].trim();
+                const url = match[2].trim();
+                const description = match[3] ? match[3].trim() : "No description provided.";
                 
+                // Skip it if it accidentally grabbed a table of contents anchor link
                 if (url.startsWith('#')) return;
                 
                 const descLower = description.toLowerCase();
@@ -72,16 +58,13 @@ function parseMarkdown(markdown) {
                     difficulty = "Advanced";
                 }
 
-                // Only add if it actually has a name
-                if (name.length > 0) {
-                    osintTools.push({ name, url, category: currentCategory, description, difficulty });
-                }
+                osintTools.push({ name, url, category: currentCategory, description, difficulty });
             }
         }
     });
 
     populateCategoryButtons();
-    filterTools(); 
+    renderTable(osintTools);
 }
 
 function populateCategoryButtons() {
@@ -110,16 +93,11 @@ function renderTable(tools) {
     const tbody = document.getElementById("tableBody");
     tbody.innerHTML = ""; 
 
-    // Safety check if array is empty
-    if (!tools || tools.length === 0) {
-        document.getElementById("toolCount").innerText = "No tools found matching your criteria.";
-        return;
-    }
-
     tools.forEach((tool, index) => {
         const tr = document.createElement("tr");
         tr.className = "fade-in";
-        tr.style.animationDelay = `${Math.min(index * 0.01, 0.3)}s`; 
+        // Cap the animation delay so huge lists don't take forever to fade in
+        tr.style.animationDelay = `${Math.min(index * 0.02, 0.5)}s`; 
         
         const diffClass = tool.difficulty === "Advanced" ? "tag-advanced" : "tag-beginner";
 
@@ -136,77 +114,19 @@ function renderTable(tools) {
 }
 
 function filterTools() {
-    // If tools aren't loaded yet, do nothing
-    if (osintTools.length === 0) return;
-
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     
-    // 1. Filter the tools
-    let filteredTools = osintTools.filter(tool => {
-        const safeName = (tool.name || "").toLowerCase();
-        const safeDesc = (tool.description || "").toLowerCase();
-        const safeCat = (tool.category || "").toLowerCase();
-        
-        const matchesSearch = safeName.includes(searchTerm) || safeDesc.includes(searchTerm) || safeCat.includes(searchTerm);
+    const filteredTools = osintTools.filter(tool => {
+        const matchesSearch = tool.name.toLowerCase().includes(searchTerm) || tool.description.toLowerCase().includes(searchTerm) || tool.category.toLowerCase().includes(searchTerm);
         const matchesCategory = activeCategory === "All" || tool.category === activeCategory;
         
         return matchesSearch && matchesCategory;
     });
 
-    // 2. Sort the tools safely
-    filteredTools.sort((a, b) => {
-        let valA = a[sortCol] || "";
-        let valB = b[sortCol] || "";
-
-        // Handle Difficulty sorting
-        if (sortCol === "difficulty") {
-            valA = a.difficulty === "Beginner" ? "0" : "1";
-            valB = b.difficulty === "Beginner" ? "0" : "1";
-        } else {
-            valA = valA.toLowerCase();
-            valB = valB.toLowerCase();
-        }
-
-        // Standard, stable sorting logic that won't freeze the browser
-        if (valA < valB) {
-            return sortAsc ? -1 : 1;
-        }
-        if (valA > valB) {
-            return sortAsc ? 1 : -1;
-        }
-        return 0;
-    });
-
-    // 3. Update UI
-    updateSortHeaders();
     renderTable(filteredTools);
 }
 
-function updateSortHeaders() {
-    document.querySelectorAll('th.sortable .sort-icon').forEach(icon => icon.innerText = '');
-    const activeTh = document.querySelector(`th[data-sort="${sortCol}"] .sort-icon`);
-    if (activeTh) {
-        activeTh.innerText = sortAsc ? ' ▲' : ' ▼';
-    }
-}
-
-// Add event listeners safely
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-            const col = th.getAttribute('data-sort');
-            if (sortCol === col) {
-                sortAsc = !sortAsc; 
-            } else {
-                sortCol = col;
-                sortAsc = true; 
-            }
-            filterTools();
-        });
-    });
-
-    document.getElementById("searchInput").addEventListener("input", filterTools);
-});
+document.getElementById("searchInput").addEventListener("input", filterTools);
 
 // Start
 fetchTools();
