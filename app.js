@@ -1,4 +1,7 @@
-const GITHUB_RAW_URL = "https://raw.githubusercontent.com/jivoi/awesome-osint/master/README.md";
+// Add a random timestamp to bypass aggressive browser caching
+const CACHE_BUSTER = new Date().getTime();
+const GITHUB_RAW_URL = `https://raw.githubusercontent.com/jivoi/awesome-osint/master/README.md?v=${CACHE_BUSTER}`;
+
 let osintTools = [];
 let categories = new Set();
 let activeCategory = "All"; 
@@ -8,12 +11,27 @@ let sortAsc = true;
 
 async function fetchTools() {
     try {
-        const response = await fetch(GITHUB_RAW_URL);
+        // Update the loading text so we know it's trying to connect
+        document.getElementById("toolCount").innerText = "Connecting to GitHub...";
+        
+        const response = await fetch(GITHUB_RAW_URL, {
+            method: 'GET',
+            // Do not send extra headers, this prevents CORS pre-flight blocks
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+        
         const markdownText = await response.text();
+        
+        document.getElementById("toolCount").innerText = "Parsing data...";
         parseMarkdown(markdownText);
+        
     } catch (error) {
-        document.getElementById("toolCount").innerText = "Error loading tools.";
-        console.error("Error fetching data:", error);
+        // Print the exact error to the screen so we can see what's wrong
+        document.getElementById("toolCount").innerHTML = `<span style="color: #ff4444;">Connection failed: ${error.message}. Please try refreshing the page.</span>`;
+        console.error("Fetch error details:", error);
     }
 }
 
