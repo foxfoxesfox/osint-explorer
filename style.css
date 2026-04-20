@@ -345,3 +345,19 @@ a.tool-link:hover { color: #79c0ff; }
     background-color: rgba(0, 255, 127, 0.1);
     box-shadow: 0 0 20px rgba(0, 255, 127, 0.35);
 }
+
+.site-footer {
+    text-align: center;
+    padding: 24px 20px;
+    margin-top: 40px;
+    border-top: 1px solid #30363d;
+    font-size: 0.8rem;
+    color: #8b949e;
+}
+
+.site-footer a {
+    color: #58a6ff;
+    text-decoration: none;
+}
+
+.site-footer a:hover { text-decoration: underline; }
