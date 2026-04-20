@@ -3,7 +3,6 @@ let osintTools = [];
 let categories = new Set();
 let activeCategory = "All"; 
 
-// Default sorting state
 let sortCol = "name";
 let sortAsc = true; 
 
@@ -13,7 +12,7 @@ async function fetchTools() {
         const markdownText = await response.text();
         parseMarkdown(markdownText);
     } catch (error) {
-        document.getElementById("toolCount").innerText = "Error loading tools. Check internet connection.";
+        document.getElementById("toolCount").innerText = "Error loading tools.";
         console.error("Error fetching data:", error);
     }
 }
@@ -24,6 +23,9 @@ function parseMarkdown(markdown) {
     const toolRegex = /^[*-]\s+\[(.*?)\]\((http.*?)\)(?:\s*(?:[-:]|—)\s*(.*))?$/;
     let parsingTools = false;
 
+    // Reset array to prevent duplicates on reload
+    osintTools = [];
+
     lines.forEach(line => {
         if (line.startsWith('## ↑ ') || line.startsWith('### General Search')) {
             parsingTools = true;
@@ -32,16 +34,17 @@ function parseMarkdown(markdown) {
 
         if (line.startsWith('### ') || line.startsWith('## ↑ ')) {
             currentCategory = line.replace(/#/g, '').replace('↑', '').trim();
-            if (currentCategory.length < 40) {
+            if (currentCategory.length > 0 && currentCategory.length < 40) {
                 categories.add(currentCategory);
             }
         } 
         else {
             const match = line.match(toolRegex);
             if (match) {
-                const name = match[1].trim();
-                const url = match[2].trim();
-                const description = match[3] ? match[3].trim() : "No description provided.";
+                // Force everything to be a string immediately to prevent undefined errors
+                const name = String(match[1] || "").trim();
+                const url = String(match[2] || "").trim();
+                const description = String(match[3] || "No description provided.").trim();
                 
                 if (url.startsWith('#')) return;
                 
@@ -51,7 +54,10 @@ function parseMarkdown(markdown) {
                     difficulty = "Advanced";
                 }
 
-                osintTools.push({ name, url, category: currentCategory, description, difficulty });
+                // Only add if it actually has a name
+                if (name.length > 0) {
+                    osintTools.push({ name, url, category: currentCategory, description, difficulty });
+                }
             }
         }
     });
@@ -86,10 +92,16 @@ function renderTable(tools) {
     const tbody = document.getElementById("tableBody");
     tbody.innerHTML = ""; 
 
+    // Safety check if array is empty
+    if (!tools || tools.length === 0) {
+        document.getElementById("toolCount").innerText = "No tools found matching your criteria.";
+        return;
+    }
+
     tools.forEach((tool, index) => {
         const tr = document.createElement("tr");
         tr.className = "fade-in";
-        tr.style.animationDelay = `${Math.min(index * 0.02, 0.5)}s`; 
+        tr.style.animationDelay = `${Math.min(index * 0.01, 0.3)}s`; 
         
         const diffClass = tool.difficulty === "Advanced" ? "tag-advanced" : "tag-beginner";
 
@@ -106,13 +118,15 @@ function renderTable(tools) {
 }
 
 function filterTools() {
+    // If tools aren't loaded yet, do nothing
+    if (osintTools.length === 0) return;
+
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     
     let filteredTools = osintTools.filter(tool => {
-        // Safe lowercasing for search
-        const safeName = (tool.name || "").toLowerCase();
-        const safeDesc = (tool.description || "").toLowerCase();
-        const safeCat = (tool.category || "").toLowerCase();
+        const safeName = String(tool.name).toLowerCase();
+        const safeDesc = String(tool.description).toLowerCase();
+        const safeCat = String(tool.category).toLowerCase();
         
         const matchesSearch = safeName.includes(searchTerm) || safeDesc.includes(searchTerm) || safeCat.includes(searchTerm);
         const matchesCategory = activeCategory === "All" || tool.category === activeCategory;
@@ -120,19 +134,17 @@ function filterTools() {
         return matchesSearch && matchesCategory;
     });
 
-    // Handle Sorting Safely
+    // Bulletproof Sorting
     filteredTools.sort((a, b) => {
-        // Safe value extraction to prevent undefined errors
-        let valA = a[sortCol] || "";
-        let valB = b[sortCol] || "";
+        let valA = String(a[sortCol] || "");
+        let valB = String(b[sortCol] || "");
 
         if (sortCol === "difficulty") {
-            valA = a.difficulty === "Beginner" ? 1 : 2;
-            valB = b.difficulty === "Beginner" ? 1 : 2;
+            valA = a.difficulty === "Beginner" ? "1" : "2";
+            valB = b.difficulty === "Beginner" ? "1" : "2";
         } else {
-            // Only lowercase if it's a string
-            valA = valA.toString().toLowerCase();
-            valB = valB.toString().toLowerCase();
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
         }
 
         if (valA < valB) return sortAsc ? -1 : 1;
@@ -152,20 +164,23 @@ function updateSortHeaders() {
     }
 }
 
-document.querySelectorAll('th.sortable').forEach(th => {
-    th.addEventListener('click', () => {
-        const col = th.getAttribute('data-sort');
-        if (sortCol === col) {
-            sortAsc = !sortAsc; 
-        } else {
-            sortCol = col;
-            sortAsc = true; 
-        }
-        filterTools();
+// Add event listeners safely
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.getAttribute('data-sort');
+            if (sortCol === col) {
+                sortAsc = !sortAsc; 
+            } else {
+                sortCol = col;
+                sortAsc = true; 
+            }
+            filterTools();
+        });
     });
-});
 
-document.getElementById("searchInput").addEventListener("input", filterTools);
+    document.getElementById("searchInput").addEventListener("input", filterTools);
+});
 
 // Start
 fetchTools();
