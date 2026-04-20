@@ -8,7 +8,9 @@
 </head>
 <body>
     <div class="container">
-        <div class="sticky-header">
+
+        <!-- Header — NOT sticky anymore -->
+        <div class="page-header" id="top">
             <header>
                 <h1>OSINT<span>Explorer</span></h1>
                 <p>Auto-updating open-source intelligence directory.</p>
@@ -18,11 +20,22 @@
                 <input type="text" id="searchInput" placeholder="Search tools, keywords, or features... (e.g., 'email', 'domain')">
             </div>
 
-            <div id="categoryButtons" class="category-container"></div>
+            <!-- Filter toggle button -->
+            <div class="filter-toggle-wrapper">
+                <button id="filterToggleBtn" class="filter-toggle-btn" onclick="toggleFilters()">
+                    Show Filters <span id="filterArrow">▼</span>
+                </button>
+            </div>
+
+            <!-- Collapsible filter section — hidden by default -->
+            <div id="filterSection" class="filter-section collapsed">
+                <div id="categoryButtons" class="category-container"></div>
+            </div>
 
             <div id="toolCount" class="status-text">Fetching live data from GitHub...</div>
         </div>
 
+        <!-- Table -->
         <table id="toolsTable">
             <thead>
                 <tr>
@@ -34,8 +47,43 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
+
     </div>
 
+    <!-- Back to Top button -->
+    <button id="backToTopBtn" class="back-to-top" onclick="scrollToTop()" title="Back to top">↑</button>
+
     <script src="app.js"></script>
+    <script>
+        let filtersVisible = false;
+
+        function toggleFilters() {
+            filtersVisible = !filtersVisible;
+            const section = document.getElementById("filterSection");
+            const arrow   = document.getElementById("filterArrow");
+            const btn     = document.getElementById("filterToggleBtn");
+
+            if (filtersVisible) {
+                section.classList.remove("collapsed");
+                arrow.textContent = "▲";
+                btn.textContent   = "";
+                btn.innerHTML     = "Hide Filters <span id='filterArrow'>▲</span>";
+            } else {
+                section.classList.add("collapsed");
+                arrow.textContent = "▼";
+                btn.innerHTML     = "Show Filters <span id='filterArrow'>▼</span>";
+            }
+        }
+
+        // Back to Top button visibility
+        window.addEventListener("scroll", () => {
+            const btn = document.getElementById("backToTopBtn");
+            btn.style.display = window.scrollY > 400 ? "flex" : "none";
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    </script>
 </body>
 </html>
