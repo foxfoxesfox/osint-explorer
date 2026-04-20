@@ -3,6 +3,10 @@ let osintTools = [];
 let categories = new Set();
 let activeCategory = "All"; 
 
+// Default sorting state
+let sortCol = "name";
+let sortAsc = true; // true = A-Z, false = Z-A
+
 async function fetchTools() {
     try {
         const response = await fetch(GITHUB_RAW_URL);
@@ -17,11 +21,17 @@ async function fetchTools() {
 function parseMarkdown(markdown) {
     const lines = markdown.split('\n');
     let currentCategory = "General";
-    const toolRegex = /^[*-]\s+\[(.*?)\]\((.*?)\)(?:\s*(?:[-:]|—)\s*(.*))?$/;
+    const toolRegex = /^[*-]\s+\[(.*?)\]\((http.*?)\)(?:\s*(?:[-:]|—)\s*(.*))?$/;
+    let parsingTools = false;
 
     lines.forEach(line => {
-        if (line.startsWith('### ') || line.startsWith('## ')) {
-            currentCategory = line.replace(/#/g, '').trim();
+        if (line.startsWith('## ↑ ') || line.startsWith('### General Search')) {
+            parsingTools = true;
+        }
+        if (!parsingTools) return;
+
+        if (line.startsWith('### ') || line.startsWith('## ↑ ')) {
+            currentCategory = line.replace(/#/g, '').replace('↑', '').trim();
             if (currentCategory.length < 40) {
                 categories.add(currentCategory);
             }
@@ -32,6 +42,8 @@ function parseMarkdown(markdown) {
                 const name = match[1].trim();
                 const url = match[2].trim();
                 const description = match[3] ? match[3].trim() : "No description provided.";
+                
+                if (url.startsWith('#')) return;
                 
                 const descLower = description.toLowerCase();
                 let difficulty = "Beginner";
@@ -45,7 +57,8 @@ function parseMarkdown(markdown) {
     });
 
     populateCategoryButtons();
-    renderTable(osintTools);
+    // Run filterTools initially to apply the default A-Z sorting
+    filterTools(); 
 }
 
 function populateCategoryButtons() {
@@ -77,7 +90,7 @@ function renderTable(tools) {
     tools.forEach((tool, index) => {
         const tr = document.createElement("tr");
         tr.className = "fade-in";
-        tr.style.animationDelay = `${(index % 15) * 0.02}s`; 
+        tr.style.animationDelay = `${Math.min(index * 0.02, 0.5)}s`; 
         
         const diffClass = tool.difficulty === "Advanced" ? "tag-advanced" : "tag-beginner";
 
@@ -96,17 +109,58 @@ function renderTable(tools) {
 function filterTools() {
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     
-    const filteredTools = osintTools.filter(tool => {
+    let filteredTools = osintTools.filter(tool => {
         const matchesSearch = tool.name.toLowerCase().includes(searchTerm) || tool.description.toLowerCase().includes(searchTerm) || tool.category.toLowerCase().includes(searchTerm);
         const matchesCategory = activeCategory === "All" || tool.category === activeCategory;
-        
         return matchesSearch && matchesCategory;
     });
 
+    // Handle Sorting
+    filteredTools.sort((a, b) => {
+        let valA = a[sortCol];
+        let valB = b[sortCol];
+
+        if (sortCol === "difficulty") {
+            // Force Beginner (1) to come before Advanced (2)
+            valA = a.difficulty === "Beginner" ? 1 : 2;
+            valB = b.difficulty === "Beginner" ? 1 : 2;
+        } else {
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+        }
+
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+    });
+
+    updateSortHeaders();
     renderTable(filteredTools);
 }
 
-// Listen for typing in the search bar (fires instantly on every keystroke)
+// Update the Up/Down arrows in the table headers
+function updateSortHeaders() {
+    document.querySelectorAll('th.sortable .sort-icon').forEach(icon => icon.innerText = '');
+    const activeTh = document.querySelector(`th[data-sort="${sortCol}"] .sort-icon`);
+    if (activeTh) {
+        activeTh.innerText = sortAsc ? ' ▲' : ' ▼';
+    }
+}
+
+// Add click listeners to headers for sorting
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.getAttribute('data-sort');
+        if (sortCol === col) {
+            sortAsc = !sortAsc; // Toggle direction if clicking the same column
+        } else {
+            sortCol = col;
+            sortAsc = true; // Default to ascending when clicking a new column
+        }
+        filterTools();
+    });
+});
+
 document.getElementById("searchInput").addEventListener("input", filterTools);
 
 // Start

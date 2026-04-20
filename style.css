@@ -183,3 +183,21 @@ a.tool-link:hover {
 .fade-in {
     animation: fadeIn 0.3s ease forwards;
 }
+
+/* Sortable Table Headers */
+th.sortable {
+    cursor: pointer;
+    user-select: none; /* Prevents text highlighting when double-clicking */
+    transition: background-color 0.2s ease;
+}
+
+th.sortable:hover {
+    background-color: #30363d;
+}
+
+.sort-icon {
+    font-size: 0.8rem;
+    margin-left: 5px;
+    color: #00ff7f;
+    opacity: 0.8;
+}
