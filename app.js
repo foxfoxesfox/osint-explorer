@@ -141,10 +141,11 @@ function filterTools() {
 
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     
+    // 1. Filter the tools
     let filteredTools = osintTools.filter(tool => {
-        const safeName = String(tool.name).toLowerCase();
-        const safeDesc = String(tool.description).toLowerCase();
-        const safeCat = String(tool.category).toLowerCase();
+        const safeName = (tool.name || "").toLowerCase();
+        const safeDesc = (tool.description || "").toLowerCase();
+        const safeCat = (tool.category || "").toLowerCase();
         
         const matchesSearch = safeName.includes(searchTerm) || safeDesc.includes(searchTerm) || safeCat.includes(searchTerm);
         const matchesCategory = activeCategory === "All" || tool.category === activeCategory;
@@ -152,24 +153,31 @@ function filterTools() {
         return matchesSearch && matchesCategory;
     });
 
-    // Bulletproof Sorting
+    // 2. Sort the tools safely
     filteredTools.sort((a, b) => {
-        let valA = String(a[sortCol] || "");
-        let valB = String(b[sortCol] || "");
+        let valA = a[sortCol] || "";
+        let valB = b[sortCol] || "";
 
+        // Handle Difficulty sorting
         if (sortCol === "difficulty") {
-            valA = a.difficulty === "Beginner" ? "1" : "2";
-            valB = b.difficulty === "Beginner" ? "1" : "2";
+            valA = a.difficulty === "Beginner" ? "0" : "1";
+            valB = b.difficulty === "Beginner" ? "0" : "1";
         } else {
             valA = valA.toLowerCase();
             valB = valB.toLowerCase();
         }
 
-        if (valA < valB) return sortAsc ? -1 : 1;
-        if (valA > valB) return sortAsc ? 1 : -1;
+        // Standard, stable sorting logic that won't freeze the browser
+        if (valA < valB) {
+            return sortAsc ? -1 : 1;
+        }
+        if (valA > valB) {
+            return sortAsc ? 1 : -1;
+        }
         return 0;
     });
 
+    // 3. Update UI
     updateSortHeaders();
     renderTable(filteredTools);
 }
