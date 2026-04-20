@@ -7,39 +7,53 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Sticky Header Group -->
-        <div class="sticky-header">
-            <header>
+    <div class="sticky-header">
+        <div class="header-inner">
+            <div class="logo">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-label="OSINT Explorer Logo">
+                    <circle cx="16" cy="16" r="10" stroke="#00ff7f" stroke-width="2.5" fill="none"/>
+                    <line x1="23" y1="23" x2="33" y2="33" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="16" cy="16" r="4" fill="#00ff7f" opacity="0.3"/>
+                    <circle cx="16" cy="16" r="1.5" fill="#00ff7f"/>
+                </svg>
                 <h1>OSINT<span>Explorer</span></h1>
-                <p>Auto-updating open-source intelligence directory.</p>
-            </header>
-
-            <div class="controls">
-                <input type="text" id="searchInput" placeholder="Search tools, keywords, or features... (e.g., 'email', 'domain')">
             </div>
-            
-            <!-- Category Buttons Container -->
-            <div id="categoryButtons" class="category-container">
-                <!-- JavaScript will inject the buttons here -->
-            </div>
-
-            <div id="toolCount" class="status-text">Fetching live data from GitHub...</div>
+            <p class="tagline">Auto-updating open-source intelligence directory, powered by <a href="https://github.com/jivoi/awesome-osint" target="_blank" rel="noopener noreferrer">awesome-osint</a>.</p>
         </div>
 
-        <table id="toolsTable">
-            <thead>
-                <tr>
-                    <th class="sortable" data-sort="name">Tool Name <span class="sort-icon"></span></th>
-                    <th class="sortable" data-sort="category">Category <span class="sort-icon"></span></th>
-                    <th class="sortable" data-sort="description">Description <span class="sort-icon"></span></th>
-                    <th class="sortable" data-sort="difficulty">Difficulty <span class="sort-icon"></span></th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- JavaScript will inject the tools here -->
-            </tbody>
-        </table>
+        <div class="controls-wrapper">
+            <input type="text" id="searchInput" placeholder="Search tools, keywords, or use case... (e.g. 'email', 'dark web', 'geolocation')" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div id="categoryButtons" class="category-container">
+            <!-- JS injects category buttons here -->
+        </div>
+
+        <div id="statusBar" class="status-bar">
+            <span id="toolCount">Fetching live data from GitHub...</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="table-wrapper">
+            <table id="toolsTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-col="name">Tool Name <span class="sort-arrow"></span></th>
+                        <th class="sortable" data-col="category">Category <span class="sort-arrow"></span></th>
+                        <th class="sortable" data-col="description">Description <span class="sort-arrow"></span></th>
+                        <th class="sortable" data-col="difficulty">Difficulty <span class="sort-arrow"></span></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+            <p>No tools match your search. Try different keywords.</p>
+        </div>
     </div>
 
     <script src="app.js"></script>
