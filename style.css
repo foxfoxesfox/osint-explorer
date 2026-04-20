@@ -8,7 +8,7 @@
 body {
     background-color: #0d1117;
     color: #c9d1d9;
-    padding: 0 0 60px 0;
+    padding: 0 0 80px 0; /* Ensures the last row isn't covered by the footer */
 }
 
 .container {
@@ -320,11 +320,48 @@ a.tool-link:hover { color: #79c0ff; }
 
 .fade-in { animation: fadeIn 0.3s ease forwards; }
 
-/* ── Back to Top ── */
+/* ── Sticky Footer ── */
+.site-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(22, 27, 34, 0.9); /* Matches the dark theme */
+    backdrop-filter: blur(10px);       /* Glassmorphism effect */
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid #30363d;
+    padding: 12px 20px;
+    z-index: 200;
+    
+    /* Centering */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.site-footer p {
+    font-size: 0.85rem;
+    color: #8b949e;
+    margin: 0;
+}
+
+.site-footer a {
+    color: #58a6ff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
+    color: #79c0ff;
+}
+
+/* ── Back to Top (Adjusted to avoid footer) ── */
 .back-to-top {
     display: none;
     position: fixed;
-    bottom: 30px;
+    bottom: 60px; /* Increased from 30px so it sits ABOVE the footer */
     right: 30px;
     width: 44px;
     height: 44px;
@@ -345,19 +382,3 @@ a.tool-link:hover { color: #79c0ff; }
     background-color: rgba(0, 255, 127, 0.1);
     box-shadow: 0 0 20px rgba(0, 255, 127, 0.35);
 }
-
-.site-footer {
-    text-align: center;
-    padding: 24px 20px;
-    margin-top: 40px;
-    border-top: 1px solid #30363d;
-    font-size: 0.8rem;
-    color: #8b949e;
-}
-
-.site-footer a {
-    color: #58a6ff;
-    text-decoration: none;
-}
-
-.site-footer a:hover { text-decoration: underline; }
