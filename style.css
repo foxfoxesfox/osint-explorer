@@ -16,7 +16,6 @@ body {
     margin: 0 auto;
 }
 
-/* Glassmorphism Sticky Header */
 .sticky-header {
     position: sticky;
     top: 0;
@@ -39,16 +38,13 @@ h1 {
     letter-spacing: -1px;
 }
 
-h1 span {
-    color: #00ff7f;
-}
+h1 span { color: #00ff7f; }
 
 header p {
     color: #8b949e;
     margin-top: 5px;
 }
 
-/* Search Bar */
 .controls {
     display: flex;
     justify-content: center;
@@ -73,34 +69,25 @@ input[type="text"]:focus {
     box-shadow: 0 0 8px rgba(0, 255, 127, 0.2);
 }
 
-/* Category Buttons — wrapping grid, not horizontal scroll */
+/* ── Category Buttons: wrapping flex, NOT horizontal scroll ── */
 .category-container {
     display: flex;
-    flex-wrap: wrap;        /* wraps to new lines instead of scrolling */
+    flex-wrap: wrap;
     gap: 8px;
-    padding: 12px 5px;
+    padding: 15px 5px;
     margin-top: 10px;
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.category-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.category-container::-webkit-scrollbar-thumb {
-    background-color: #30363d;
-    border-radius: 10px;
-}
-
 .category-btn {
     background-color: #21262d;
     color: #c9d1d9;
     border: 1px solid #30363d;
-    padding: 8px 18px;
+    padding: 6px 16px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s ease;
@@ -126,7 +113,6 @@ input[type="text"]:focus {
     margin-top: 10px;
 }
 
-/* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -164,18 +150,31 @@ a.tool-link {
     transition: color 0.2s;
 }
 
-a.tool-link:hover {
-    color: #79c0ff;
+a.tool-link:hover { color: #79c0ff; }
+
+.tag-advanced {
+    background-color: rgba(163, 113, 247, 0.2);
+    color: #a371f7;
+    border: 1px solid #a371f7;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
 }
 
-.tag-advanced { background-color: rgba(163, 113, 247, 0.2); color: #a371f7; border: 1px solid #a371f7; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-.tag-beginner { background-color: rgba(46, 160, 67, 0.2); color: #2ea043; border: 1px solid #2ea043; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.tag-beginner {
+    background-color: rgba(46, 160, 67, 0.2);
+    color: #2ea043;
+    border: 1px solid #2ea043;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-    animation: fadeIn 0.3s ease forwards;
-}
+.fade-in { animation: fadeIn 0.3s ease forwards; }

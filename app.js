@@ -1,8 +1,8 @@
 const API_URL = "https://api.github.com/repos/jivoi/awesome-osint/contents/README.md";
 
-let osintTools      = [];
-let categories      = new Set();
-let activeCategory  = "All";
+let osintTools     = [];
+let categories     = new Set();
+let activeCategory = "All";
 
 async function fetchTools() {
     try {
@@ -37,7 +37,7 @@ function cleanHeading(raw) {
 function parseMarkdown(markdown) {
     const lines = markdown.split("\n");
 
-    // FIX: also match *[Name](url) with NO space after the asterisk
+    // \s* (zero or more spaces) after the bullet — handles both "* [" and "*["
     const toolRegex = /^[*-]\s*\[(.+?)\]\((https?:\/\/.+?)\)(?:\s*[-–—:]\s*(.*))?$/;
 
     let currentCategory = "General";
@@ -53,7 +53,6 @@ function parseMarkdown(markdown) {
         if (trimmed.startsWith("## ") || trimmed.startsWith("### ")) {
             const heading = cleanHeading(trimmed);
             if (skipHeadings.has(heading.toLowerCase())) return;
-
             parsingTools    = true;
             currentCategory = heading;
             categories.add(currentCategory);
@@ -99,23 +98,26 @@ function populateCategoryButtons() {
         const btn = document.createElement("button");
         btn.className = "category-btn" + (category === "All" ? " active" : "");
         btn.innerText = category;
+        btn.setAttribute("data-cat", category);
 
         btn.onclick = () => {
-            // FIX: clicking an already-active category deselects it back to "All"
+            // If clicking the already-active category → deselect, reset to All
             if (activeCategory === category && category !== "All") {
                 activeCategory = "All";
-                document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
-                document.querySelector(".category-btn[data-cat='All']").classList.add("active");
             } else {
                 activeCategory = category;
-                document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+            }
+
+            // Update active styling
+            document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+            document.querySelector(`.category-btn[data-cat="All"]`).classList.add("active");
+            if (activeCategory !== "All") {
                 btn.classList.add("active");
             }
+
             filterTools();
         };
 
-        // Store category name as data attribute for easy lookup
-        btn.setAttribute("data-cat", category);
         container.appendChild(btn);
     });
 }
