@@ -41,6 +41,7 @@ body {
     font-weight: 800;
     color: #fff;
     letter-spacing: -0.5px;
+    text-decoration: none;
 }
 
 .nav-logo span { color: #00ff7f; }
