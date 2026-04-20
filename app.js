@@ -4,6 +4,10 @@ let osintTools     = [];
 let categories     = new Set();
 let activeCategory = "All";
 
+// Sorting state
+let sortCol = "name";
+let sortAsc = true;
+
 async function fetchTools() {
     try {
         const res = await fetch(API_URL, {
@@ -35,9 +39,7 @@ function cleanHeading(raw) {
 }
 
 function parseMarkdown(markdown) {
-    const lines = markdown.split("\n");
-
-    // \s* (zero or more spaces) after the bullet — handles both "* [" and "*["
+    const lines     = markdown.split("\n");
     const toolRegex = /^[*-]\s*\[(.+?)\]\((https?:\/\/.+?)\)(?:\s*[-–—:]\s*(.*))?$/;
 
     let currentCategory = "General";
@@ -67,7 +69,6 @@ function parseMarkdown(markdown) {
         const name        = (match[1] || "").trim();
         const url         = (match[2] || "").trim();
         const description = (match[3] || "No description provided.").trim();
-
         if (!name || !url) return;
 
         const dl = description.toLowerCase();
@@ -83,6 +84,9 @@ function parseMarkdown(markdown) {
 
         osintTools.push({ name, url, category: currentCategory, description, difficulty });
     });
+
+    // Default sort: name A→Z
+    osintTools.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
     populateCategoryButtons();
     renderTable(osintTools);
@@ -101,25 +105,79 @@ function populateCategoryButtons() {
         btn.setAttribute("data-cat", category);
 
         btn.onclick = () => {
-            // If clicking the already-active category → deselect, reset to All
             if (activeCategory === category && category !== "All") {
                 activeCategory = "All";
             } else {
                 activeCategory = category;
             }
-
-            // Update active styling
             document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
-            document.querySelector(`.category-btn[data-cat="All"]`).classList.add("active");
-            if (activeCategory !== "All") {
-                btn.classList.add("active");
-            }
-
-            filterTools();
+            const allBtn = document.querySelector(`.category-btn[data-cat="All"]`);
+            if (allBtn) allBtn.classList.add("active");
+            if (activeCategory !== "All") btn.classList.add("active");
+            filterAndRender();
         };
 
         container.appendChild(btn);
     });
+}
+
+// ── Sorting ───────────────────────────────────────────────────────────────────
+function sortBy(col) {
+    if (sortCol === col) {
+        sortAsc = !sortAsc;
+    } else {
+        sortCol = col;
+        // Difficulty: default Beginner first (ascending)
+        sortAsc = true;
+    }
+    updateSortIcons();
+    filterAndRender();
+}
+
+function updateSortIcons() {
+    ["name", "category", "description", "difficulty"].forEach(col => {
+        const el = document.getElementById(`sort-${col}`);
+        const th = document.querySelector(`th[data-col="${col}"]`);
+        if (!el || !th) return;
+        if (col === sortCol) {
+            el.textContent = sortAsc ? "▲" : "▼";
+            th.classList.add("active-sort");
+        } else {
+            el.textContent = "";
+            th.classList.remove("active-sort");
+        }
+    });
+}
+
+function filterAndRender() {
+    const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+
+    let filtered = osintTools.filter(tool => {
+        const matchSearch =
+            tool.name.toLowerCase().includes(searchTerm) ||
+            tool.description.toLowerCase().includes(searchTerm) ||
+            tool.category.toLowerCase().includes(searchTerm);
+        const matchCat = activeCategory === "All" || tool.category === activeCategory;
+        return matchSearch && matchCat;
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+        let va, vb;
+        if (sortCol === "difficulty") {
+            // Beginner = 0, Advanced = 1 so ascending = Beginner first
+            va = a.difficulty === "Beginner" ? 0 : 1;
+            vb = b.difficulty === "Beginner" ? 0 : 1;
+            return sortAsc ? va - vb : vb - va;
+        }
+        va = (a[sortCol] || "").toLowerCase();
+        vb = (b[sortCol] || "").toLowerCase();
+        if (va < vb) return sortAsc ? -1 : 1;
+        if (va > vb) return sortAsc ?  1 : -1;
+        return 0;
+    });
+
+    renderTable(filtered);
 }
 
 function renderTable(tools) {
@@ -145,21 +203,6 @@ function renderTable(tools) {
     document.getElementById("toolCount").innerText = `Showing ${tools.length} active tools.`;
 }
 
-function filterTools() {
-    const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+document.getElementById("searchInput").addEventListener("input", filterAndRender);
 
-    const filtered = osintTools.filter(tool => {
-        const matchSearch =
-            tool.name.toLowerCase().includes(searchTerm) ||
-            tool.description.toLowerCase().includes(searchTerm) ||
-            tool.category.toLowerCase().includes(searchTerm);
-        const matchCat = activeCategory === "All" || tool.category === activeCategory;
-        return matchSearch && matchCat;
-    });
-
-    renderTable(filtered);
-    document.getElementById("toolCount").innerText = `Showing ${filtered.length} active tools.`;
-}
-
-document.getElementById("searchInput").addEventListener("input", filterTools);
 fetchTools();

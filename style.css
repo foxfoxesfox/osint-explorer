@@ -8,18 +8,65 @@
 body {
     background-color: #0d1117;
     color: #c9d1d9;
-    padding: 0 20px 60px 20px;
+    padding: 0 0 60px 0;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 20px;
 }
+
+/* ── Navbar ── */
+.navbar {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+}
+
+.nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+}
+
+.nav-logo {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+}
+
+.nav-logo span { color: #00ff7f; }
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #8b949e;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover { color: #00ff7f; }
 
 /* ── Page Header — NOT sticky ── */
 .page-header {
     padding: 30px 0 10px 0;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     border-bottom: 1px solid #30363d;
 }
 
@@ -39,9 +86,17 @@ h1 span { color: #00ff7f; }
 header p {
     color: #8b949e;
     margin-top: 5px;
+    font-size: 0.9rem;
 }
 
-/* ── Search Bar ── */
+header p a {
+    color: #58a6ff;
+    text-decoration: none;
+}
+
+header p a:hover { text-decoration: underline; }
+
+/* ── Search ── */
 .controls {
     display: flex;
     justify-content: center;
@@ -66,7 +121,7 @@ input[type="text"]:focus {
     box-shadow: 0 0 8px rgba(0, 255, 127, 0.2);
 }
 
-/* ── Filter Toggle Button ── */
+/* ── Filter Toggle ── */
 .filter-toggle-wrapper {
     display: flex;
     justify-content: center;
@@ -103,7 +158,7 @@ input[type="text"]:focus {
     opacity: 0;
 }
 
-/* ── Category Buttons: wrapping flex ── */
+/* ── Category Buttons ── */
 .category-container {
     display: flex;
     flex-wrap: wrap;
@@ -147,6 +202,33 @@ input[type="text"]:focus {
     margin-top: 12px;
 }
 
+/* ── Difficulty Legend ── */
+.legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #8b949e;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+}
+
+.legend-title {
+    font-weight: 600;
+    color: #c9d1d9;
+}
+
+.legend-desc { color: #8b949e; }
+
+.legend-sep {
+    color: #30363d;
+    font-size: 1rem;
+}
+
 /* ── Table ── */
 table {
     width: 100%;
@@ -166,6 +248,29 @@ th, td {
 th {
     background-color: #21262d;
     color: #ffffff;
+}
+
+/* Sortable column headers */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+th.sortable:hover {
+    background-color: #292e37;
+    color: #00ff7f;
+}
+
+th.sortable.active-sort {
+    color: #00ff7f;
+}
+
+.sort-icon {
+    font-size: 0.7rem;
+    margin-left: 4px;
+    color: #00ff7f;
 }
 
 tr {
@@ -214,7 +319,7 @@ a.tool-link:hover { color: #79c0ff; }
 
 .fade-in { animation: fadeIn 0.3s ease forwards; }
 
-/* ── Back to Top Button ── */
+/* ── Back to Top ── */
 .back-to-top {
     display: none;
     position: fixed;
